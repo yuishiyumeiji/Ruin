@@ -95,7 +95,7 @@ namespace ruin
 			template<class>
 			struct constant;
 			
-			//          X.eval(env)       => (value of (the first) X in env).eval(env)
+			//          X.eval(env)       => (the value of (the first) X in env).eval(env)
 			// let[env].in[e].eval(env')  => e.eval(env, env')
 			//   e[a1,...,an].eval(env)   => e.eval(env)(a1.eval(env),...,an.eval(env))
 			//   lambda(X)[e].eval(env)   => lambda(Y)[let[env].in[e[X->Y]]]

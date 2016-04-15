@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (C) 2011-2016 Yuishi Yumeiji.
 //
 // Distributed under the Boost Software License, Version 1.0.

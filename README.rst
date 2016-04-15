@@ -15,6 +15,8 @@ operators
 
 optional
 
+smart_ptr
+
 utility
 
 Compiler Support
