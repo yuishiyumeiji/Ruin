@@ -118,6 +118,11 @@ namespace ruin
 					: env_(env), le_(le)
 				{ }
 			public:
+				template<class Arg>
+				constexpr auto operator()(Arg const& arg) const
+				{
+					return eval(std::make_tuple())(arg);
+				}
 				template<class EnvList2>
 				constexpr auto eval(EnvList2 const& env2) const
 				{
@@ -152,6 +157,11 @@ namespace ruin
 					return le.eval(env)(std::get<Indices>(args).eval(env)...);
 				}
 			public:
+				template<class Arg>
+				constexpr auto operator()(Arg const& arg) const
+				{
+					return eval(std::make_tuple())(arg);
+				}
 				template<class EnvList>
 				constexpr auto eval(EnvList const& env) const
 				{
@@ -212,6 +222,11 @@ namespace ruin
 					: value_(t)
 				{ }
 			public:
+				template<class Arg>
+				constexpr auto operator()(Arg const& arg) const
+				{
+					return value_(arg);
+				}
 				template<class EnvList>
 				constexpr T eval(EnvList const&) const
 				{
