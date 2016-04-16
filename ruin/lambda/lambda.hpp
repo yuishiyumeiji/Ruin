@@ -84,7 +84,11 @@ namespace ruin
 			//   lambda(X)[e].eval(env)   => lambda(Y)[let[env].in[e[X->Y]]]
 			//    constant(v).eval(env)   => v
 			//
-			//        lambda(X)[e](v)     => let[X == v].in[e].eval(empty-env)
+			//    let[env].in[e](v...)    => let[env].in[e].eval()(v...)
+			//     e[a1,...,an](v...)     => e[a1,...,an].eval()(v...)
+			//      lambda(X)[e](v)       => e.eval(X == v)
+			//     constant(u)(v...)      => u(v...)
+			//
 			
 			template<std::size_t VID>
 			struct variable
@@ -118,10 +122,10 @@ namespace ruin
 					: env_(env), le_(le)
 				{ }
 			public:
-				template<class Arg>
-				constexpr auto operator()(Arg const& arg) const
+				template<class... Args>
+				constexpr auto operator()(Args const&... args) const
 				{
-					return eval(std::make_tuple())(arg);
+					return eval(std::make_tuple())(args...);
 				}
 				template<class EnvList2>
 				constexpr auto eval(EnvList2 const& env2) const
@@ -157,10 +161,10 @@ namespace ruin
 					return le.eval(env)(std::get<Indices>(args).eval(env)...);
 				}
 			public:
-				template<class Arg>
-				constexpr auto operator()(Arg const& arg) const
+				template<class... Args>
+				constexpr auto operator()(Args const&... args) const
 				{
-					return eval(std::make_tuple())(arg);
+					return eval(std::make_tuple())(args...);
 				}
 				template<class EnvList>
 				constexpr auto eval(EnvList const& env) const
@@ -222,10 +226,10 @@ namespace ruin
 					: value_(t)
 				{ }
 			public:
-				template<class Arg>
-				constexpr auto operator()(Arg const& arg) const
+				template<class... Args>
+				constexpr auto operator()(Args const&... args) const
 				{
-					return value_(arg);
+					return value_(args...);
 				}
 				template<class EnvList>
 				constexpr T eval(EnvList const&) const

@@ -30,10 +30,10 @@ namespace ruin
 					: cond_(c), then_(t), else_(e)
 				{ }
 			public:
-				template<class Arg>
-				constexpr auto operator()(Arg const& arg) const
+				template<class... Args>
+				constexpr auto operator()(Args const&... args) const
 				{
-					return eval(std::make_tuple())(arg);
+					return eval(std::make_tuple())(args...);
 				}
 				template<class EnvList>
 				constexpr auto eval(EnvList const& env) const
