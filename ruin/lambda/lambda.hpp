@@ -20,22 +20,6 @@ namespace ruin
 	{
 		namespace detail
 		{
-			template<class Tuple1, class Tuple2, std::size_t... Indices1, std::size_t... Indices2>
-			constexpr auto append_impl(Tuple1 const& tuple1, Tuple2 const& tuple2, ruin::index_tuple<Indices1...>, ruin::index_tuple<Indices2...>)
-				-> decltype(std::make_tuple(std::get<Indices1>(tuple1)..., std::get<Indices2>(tuple2)...))
-			{
-				return std::make_tuple(std::get<Indices1>(tuple1)..., std::get<Indices2>(tuple2)...);
-			}
-			template<class Tuple1, class Tuple2>
-			constexpr auto append(Tuple1 const& tuple1, Tuple2 const& tuple2)
-				-> decltype(ruin::lambda::detail::append_impl(tuple1, tuple2, ruin::index_range<0, std::tuple_size<Tuple1>::value>::make(), ruin::index_range<0, std::tuple_size<Tuple2>::value>::make()))
-			{
-				return ruin::lambda::detail::append_impl(tuple1, tuple2, ruin::index_range<0, std::tuple_size<Tuple1>::value>::make(), ruin::index_range<0, std::tuple_size<Tuple2>::value>::make());
-			}
-		}
-
-		namespace detail
-		{
 			template<std::size_t BV, class LE>
 			struct binder
 			{
@@ -61,7 +45,6 @@ namespace ruin
 			{ };
 			template<std::size_t BV, class EnvList>
 			constexpr auto get(EnvList const& env)
-				-> decltype(std::get<ruin::lambda::detail::get_impl<BV, EnvList>::value>(env).le_)
 			{
 				return std::get<ruin::lambda::detail::get_impl<BV, EnvList>::value>(env).le_;
 			}
@@ -109,17 +92,16 @@ namespace ruin
 			{
 				template<class EnvList>
 				constexpr auto eval(EnvList const& env) const
-					-> decltype(ruin::lambda::detail::get<VID>(env).eval(env))
 				{
 					return ruin::lambda::detail::get<VID>(env).eval(env);
 				}
 				template<class Arg>
-				constexpr apply<variable, std::tuple<Arg>> operator[](Arg const& arg) const
+				constexpr ruin::lambda::exp::apply<variable, std::tuple<Arg>> operator[](Arg const& arg) const
 				{
 					return {*this, std::make_tuple(arg)};
 				}
 				template<class... Args>
-				constexpr apply<variable, std::tuple<Args...>> operator[](std::tuple<Args...> const& args) const
+				constexpr ruin::lambda::exp::apply<variable, std::tuple<Args...>> operator[](std::tuple<Args...> const& args) const
 				{
 					return {*this, args};
 				}
@@ -138,17 +120,16 @@ namespace ruin
 			public:
 				template<class EnvList2>
 				constexpr auto eval(EnvList2 const& env2) const
-					-> decltype(closure::le_.eval(ruin::lambda::detail::append(closure::env_, env2)))
 				{
-					return le_.eval(ruin::lambda::detail::append(env_, env2));
+					return le_.eval(std::tuple_cat(env_, env2));
 				}
 				template<class Arg>
-				constexpr apply<closure, std::tuple<Arg>> operator[](Arg const& arg) const
+				constexpr ruin::lambda::exp::apply<closure, std::tuple<Arg>> operator[](Arg const& arg) const
 				{
 					return {*this, std::make_tuple(arg)};
 				}
 				template<class... Args>
-				constexpr apply<closure, std::tuple<Args...>> operator[](std::tuple<Args...> const& args) const
+				constexpr ruin::lambda::exp::apply<closure, std::tuple<Args...>> operator[](std::tuple<Args...> const& args) const
 				{
 					return {*this, args};
 				}
@@ -167,24 +148,22 @@ namespace ruin
 			private:
 				template<class EnvList, std::size_t... Indices>
 				static constexpr auto eval_impl(LE const& le, ArgList const& args, EnvList const& env, ruin::index_tuple<Indices...>)
-					-> decltype(le.eval(env)(std::get<Indices>(args).eval(env)...))
 				{
 					return le.eval(env)(std::get<Indices>(args).eval(env)...);
 				}
 			public:
 				template<class EnvList>
 				constexpr auto eval(EnvList const& env) const
-					-> decltype(eval_impl(apply::le_, apply::args_, env, ruin::index_range<0, std::tuple_size<ArgList>::value>::make()))
 				{
 					return eval_impl(le_, args_, env, ruin::index_range<0, std::tuple_size<ArgList>::value>::make());
 				}
 				template<class Arg>
-				constexpr apply<apply, std::tuple<Arg>> operator[](Arg const& arg) const
+				constexpr ruin::lambda::exp::apply<apply, std::tuple<Arg>> operator[](Arg const& arg) const
 				{
 					return {*this, std::make_tuple(arg)};
 				}
 				template<class... Args>
-				constexpr apply<apply, std::tuple<Args...>> operator[](std::tuple<Args...> const& args) const
+				constexpr ruin::lambda::exp::apply<apply, std::tuple<Args...>> operator[](std::tuple<Args...> const& args) const
 				{
 					return {*this, args};
 				}
@@ -202,7 +181,6 @@ namespace ruin
 			public:
 				template<class Arg>
 				constexpr auto operator()(Arg const& arg) const
-					-> decltype(abstract::le_.eval(std::make_tuple(ruin::lambda::exp::variable<BVID>() == arg)))
 				{
 					return le_.eval(std::make_tuple(ruin::lambda::exp::variable<BVID>() == arg));
 				}
@@ -213,12 +191,12 @@ namespace ruin
 					return {{env, le_}};
 				}
 				template<class Arg>
-				constexpr apply<abstract, std::tuple<Arg>> operator[](Arg const& arg) const
+				constexpr ruin::lambda::exp::apply<abstract, std::tuple<Arg>> operator[](Arg const& arg) const
 				{
 					return {*this, std::make_tuple(arg)};
 				}
 				template<class... Args>
-				constexpr apply<abstract, std::tuple<Args...>> operator[](std::tuple<Args...> const& args) const
+				constexpr ruin::lambda::exp::apply<abstract, std::tuple<Args...>> operator[](std::tuple<Args...> const& args) const
 				{
 					return {*this, args};
 				}
@@ -240,12 +218,12 @@ namespace ruin
 					return value_;
 				}
 				template<class Arg>
-				constexpr apply<constant, std::tuple<Arg>> operator[](Arg const& arg) const
+				constexpr ruin::lambda::exp::apply<constant, std::tuple<Arg>> operator[](Arg const& arg) const
 				{
 					return {*this, std::make_tuple(arg)};
 				}
 				template<class... Args>
-				constexpr apply<constant, std::tuple<Args...>> operator[](std::tuple<Args...> const& args) const
+				constexpr ruin::lambda::exp::apply<constant, std::tuple<Args...>> operator[](std::tuple<Args...> const& args) const
 				{
 					return {*this, args};
 				}
@@ -343,15 +321,13 @@ namespace ruin
 		
 		template<class T, class U, class = typename std::enable_if<(ruin::lambda::is_lambda<T>::value && ruin::lambda::is_lambda<U>::value) || (ruin::lambda::is_binder<T>::value && ruin::lambda::is_binder<U>::value)>::type>
 		constexpr auto operator,(T const& t, U const& u)
-			-> decltype(std::make_tuple(t, u))
 		{
 			return std::make_tuple(t, u);
 		}
 		template<class... List, class T, class = typename std::enable_if<ruin::lambda::is_lambda<T>::value || ruin::lambda::is_binder<T>::value>::type>
 		constexpr auto operator,(std::tuple<List...> const& lis, T const& t)
-			-> decltype(ruin::lambda::detail::append(lis, std::make_tuple(t)))
 		{
-			return ruin::lambda::detail::append(lis, std::make_tuple(t));
+			return std::tuple_cat(lis, std::make_tuple(t));
 		}
 	}
 }

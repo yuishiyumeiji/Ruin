@@ -29,7 +29,6 @@ namespace ruin
 			}
 			template < class... As >
 			constexpr auto operator()(As&&... as) const
-				-> decltype(inherited{}(std::forward<As>(as)...))
 			{
 				return static_cast<inherited const&>(*this)(std::forward<As>(as)...);
 			}

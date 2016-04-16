@@ -8,22 +8,20 @@
 #ifndef RUIN_OPERATORS_SUBTRACTABLE_HPP_INCLUDED
 #define RUIN_OPERATORS_SUBTRACTABLE_HPP_INCLUDED
 
-#include "ruin/utility/move.hpp"
+#include <utility>
 
 namespace ruin
 {
 	template < class T, class U = T >
 	class subtractable
 	{
-		friend T&
-		operator-=(T& lhs, U const& rhs)
+		friend T& operator-=(T& lhs, U const& rhs)
 		{
-			return lhs = ruin::move(lhs) - rhs;
+			return lhs = std::move(lhs) - rhs;
 		}
-		friend T&
-		operator-=(T& lhs, U&& rhs)
+		friend T& operator-=(T& lhs, U&& rhs)
 		{
-			return lhs = ruin::move(lhs) - ruin::move(rhs);
+			return lhs = std::move(lhs) - std::move(rhs);
 		}
 	};
 }

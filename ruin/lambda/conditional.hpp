@@ -32,7 +32,6 @@ namespace ruin
 			public:
 				template<class EnvList>
 				constexpr auto eval(EnvList const& env) const
-					-> decltype(conditional::cond_.eval(env) ? conditional::then_.eval(env) : conditional::else_.eval(env))
 				{
 					return cond_.eval(env) ? then_.eval(env) : else_.eval(env);
 				}

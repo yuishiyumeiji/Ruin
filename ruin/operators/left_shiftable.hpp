@@ -8,7 +8,7 @@
 #ifndef RUIN_OPERATORS_LEFT_SHIFTABLE_HPP_INCLUDED
 #define RUIN_OPERATORS_LEFT_SHIFTABLE_HPP_INCLUDED
 
-#include "ruin/utility/move.hpp"
+#include <utility>
 
 namespace ruin
 {
@@ -17,11 +17,11 @@ namespace ruin
 	{
 		friend T& operator<<=(T& lhs, U const& rhs)
 		{
-			return lhs = ruin::move(lhs) << rhs;
+			return lhs = std::move(lhs) << rhs;
 		}
 		friend T& operator<<=(T& lhs, U&& rhs)
 		{
-			return lhs = ruin::move(lhs) << ruin::move(rhs);
+			return lhs = std::move(lhs) << std::move(rhs);
 		}
 	};
 }

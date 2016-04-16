@@ -19,7 +19,7 @@ namespace ruin
 	
 	namespace detail
 	{
-		template<class T, bool = std::is_reference<T>::value, bool = std::has_trivial_copy_constructor<T>::value, bool = std::is_trivially_destructible<T>::value>
+		template<class T, bool = std::is_reference<T>::value, bool = std::is_trivially_copy_constructible<T>::value, bool = std::is_trivially_destructible<T>::value>
 		struct optional_impl;
 		template<class T>
 		struct optional_impl<T, true, true, true>
@@ -118,7 +118,7 @@ namespace ruin
 			void construct(As&&... as)
 			{
 				dispose();
-				::new(&storage_) T(ruin::forward<As>(as)...);
+				::new(&storage_) T(std::forward<As>(as)...);
 				initialized_ = true;
 			}
 			void dispose()
@@ -189,7 +189,7 @@ namespace ruin
 			void construct(As&&... as)
 			{
 				dispose();
-				::new(&storage_) T(ruin::forward<As>(as)...);
+				::new(&storage_) T(std::forward<As>(as)...);
 				initialized_ = true;
 			}
 			void dispose()
@@ -275,7 +275,7 @@ namespace ruin
 			void construct(As&&... as)
 			{
 				dispose();
-				::new(&storage_) T(ruin::forward<As>(as)...);
+				::new(&storage_) T(std::forward<As>(as)...);
 				initialized_ = true;
 			}
 			void dispose()
@@ -386,12 +386,12 @@ namespace ruin
 				}
 				else if(is_initialized())
 				{
-					construct(ruin::std(get()));
+					construct(std::move(get()));
 					dispose();
 				}
 				else if(other.is_initialized())
 				{
-					construct(ruin::std(other.get()));
+					construct(std::move(other.get()));
 					other.dispose();
 				}
 			}

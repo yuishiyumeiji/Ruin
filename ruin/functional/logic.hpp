@@ -14,7 +14,6 @@ namespace ruin
 	{
 		template<class T, class U>
 		constexpr auto operator()(T&& t, U&& u) const
-			-> decltype(t && u)
 		{
 			return t && u;
 		}
@@ -23,7 +22,6 @@ namespace ruin
 	{
 		template<class T, class U>
 		constexpr auto operator()(T&& t, U&& u) const
-			-> decltype(t || u)
 		{
 			return t || u;
 		}
@@ -32,7 +30,6 @@ namespace ruin
 	{
 		template<class T, class U>
 		constexpr auto operator()(T&& t) const
-			-> decltype(!t)
 		{
 			return !t;
 		}

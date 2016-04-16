@@ -23,28 +23,23 @@ namespace ruin
 			typedef T const& param_type;
 			typedef T holder_type;
 
-			static constexpr holder_type const&
-			hold(param_type p)
+			static constexpr holder_type const& hold(param_type p)
 			{
 				return p;
 			}
-			static constexpr reference
-			ref(holder_type& r)
+			static constexpr reference ref(holder_type& r)
 			{
 				return r;
 			}
-			static constexpr const_reference
-			ref(holder_type const& r)
+			static constexpr const_reference ref(holder_type const& r)
 			{
 				return r;
 			}
-			static constexpr pointer
-			ptr(holder_type& r)
+			static constexpr pointer ptr(holder_type& r)
 			{
 				return &r;
 			}
-			static constexpr const_pointer
-			ptr(holder_type const& r)
+			static constexpr const_pointer ptr(holder_type const& r)
 			{
 				return &r;
 			}
@@ -60,28 +55,23 @@ namespace ruin
 			typedef T const& param_type;
 			typedef T holder_type;
 
-			static constexpr holder_type const&
-			hold(param_type p)
+			static constexpr holder_type const& hold(param_type p)
 			{
 				return p;
 			}
-			static constexpr reference
-			ref(holder_type& r)
+			static constexpr reference ref(holder_type& r)
 			{
 				return r;
 			}
-			static constexpr const_reference
-			ref(holder_type const& r)
+			static constexpr const_reference ref(holder_type const& r)
 			{
 				return r;
 			}
-			static constexpr pointer
-			ptr(holder_type& r)
+			static constexpr pointer ptr(holder_type& r)
 			{
 				return &r;
 			}
-			static constexpr const_pointer
-			ptr(holder_type const& r)
+			static constexpr const_pointer ptr(holder_type const& r)
 			{
 				return &r;
 			}
@@ -97,18 +87,15 @@ namespace ruin
 			typedef T& param_type;
 			typedef T* holder_type;
 
-			static constexpr holder_type
-			hold(param_type p)
+			static constexpr holder_type hold(param_type p)
 			{
 				return &p;
 			}
-			static constexpr reference
-			ref(holder_type r)
+			static constexpr reference ref(holder_type r)
 			{
 				return *r;
 			}
-			static constexpr pointer
-			ptr(holder_type r)
+			static constexpr pointer ptr(holder_type r)
 			{
 				return r;
 			}
@@ -124,18 +111,15 @@ namespace ruin
 			typedef T const& param_type;
 			typedef T const* holder_type;
 
-			static constexpr holder_type
-			hold(param_type p)
+			static constexpr holder_type hold(param_type p)
 			{
 				return &p;
 			}
-			static constexpr reference
-			ref(holder_type r)
+			static constexpr reference ref(holder_type r)
 			{
 				return *r;
 			}
-			static constexpr pointer
-			ptr(holder_type r)
+			static constexpr pointer ptr(holder_type r)
 			{
 				return r;
 			}
