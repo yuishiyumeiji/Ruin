@@ -31,22 +31,22 @@ namespace ruin
 
 			template<std::size_t, class, int = 0>
 			struct get_impl;
-			template<std::size_t BV, class Head, class... Tail, int I>
-			struct get_impl<BV, std::tuple<Head, Tail...>, I>
-				: public ruin::lambda::detail::get_impl<BV, std::tuple<Tail...>, I + 1>
+			template<std::size_t VID, class Head, class... Tail, int I>
+			struct get_impl<VID, std::tuple<Head, Tail...>, I>
+				: public ruin::lambda::detail::get_impl<VID, std::tuple<Tail...>, I + 1>
 			{ };
-			template<std::size_t BV, class LE, class... Tail, int I>
-			struct get_impl<BV, std::tuple<ruin::lambda::detail::binder<BV, LE>, Tail...>, I>
+			template<std::size_t VID, class LE, class... Tail, int I>
+			struct get_impl<VID, std::tuple<ruin::lambda::detail::binder<VID, LE>, Tail...>, I>
 				: public std::integral_constant<std::size_t, I>
 			{ };
-			template<std::size_t BV, int I>
-			struct get_impl<BV, std::tuple<>, I>
+			template<std::size_t VID, int I>
+			struct get_impl<VID, std::tuple<>, I>
 				: public std::integral_constant<std::size_t, -1>
 			{ };
-			template<std::size_t BV, class EnvList>
+			template<std::size_t VID, class EnvList>
 			constexpr auto get(EnvList const& env)
 			{
-				return std::get<ruin::lambda::detail::get_impl<BV, EnvList>::value>(env).le_;
+				return std::get<ruin::lambda::detail::get_impl<VID, EnvList>::value>(env).le_;
 			}
 		}
 
@@ -60,8 +60,8 @@ namespace ruin
 		struct is_binder
 			: public std::integral_constant<bool, false>
 		{ };
-		template<std::size_t BV, class LE>
-		struct is_binder<ruin::lambda::detail::binder<BV, LE>>
+		template<std::size_t VID, class LE>
+		struct is_binder<ruin::lambda::detail::binder<VID, LE>>
 			: public std::integral_constant<bool, true>
 		{ };
 	
@@ -73,7 +73,7 @@ namespace ruin
 			struct closure;
 			template<class, class>
 			struct apply;
-			template<std::size_t, class>
+			template<class, class>
 			struct abstract;
 			template<class>
 			struct constant;
@@ -182,7 +182,7 @@ namespace ruin
 					return {*this, args};
 				}
 			};
-			template<std::size_t BVID, class LE>
+			template<class BVs, class LE>
 			struct abstract
 				: public ruin::lambda::lambda_base
 			{
@@ -192,15 +192,27 @@ namespace ruin
 				constexpr abstract(LE const& le)
 					: le_(le)
 				{ }
-			public:
-				template<class Arg>
-				constexpr auto operator()(Arg const& arg) const
+			private:
+				template<std::size_t I, class... Args>
+				static constexpr auto make_binder_from_tuple(std::tuple<Args...> const& args)
 				{
-					return le_.eval(std::make_tuple(ruin::lambda::exp::variable<BVID>() == arg));
+					return (std::get<I>(BVs{}) == std::get<I>(args));
+				}
+				template<std::size_t... Indices, class... Args>
+				static constexpr auto make_tuple_of_binders(std::tuple<Args...> const& args, ruin::index_tuple<Indices...>)
+				{
+					return std::make_tuple(make_binder_from_tuple<Indices>(args)...);
+				}
+			public:
+				template<class... Args>
+				constexpr auto operator()(Args const&... args) const
+				{
+					static_assert(std::tuple_size<BVs>::value == sizeof...(Args), "invalid number of arguments");
+					return le_.eval(make_tuple_of_binders(std::make_tuple(args...), ruin::index_range<0, sizeof...(Args)>::make()));
 				}
 				// substitution [X->X'] is unimplemented
 				template<class EnvList>
-				constexpr ruin::lambda::exp::abstract<BVID, closure<EnvList, LE>> eval(EnvList const& env) const
+				constexpr ruin::lambda::exp::abstract<BVs, closure<EnvList, LE>> eval(EnvList const& env) const
 				{
 					return {{env, le_}};
 				}
@@ -258,11 +270,11 @@ namespace ruin
 		namespace detail
 		{
 			template<class EnvList>
-			struct let_impl1
+			struct in_phase
 			{
 				EnvList const& env_;
-				let_impl1 const& in;
-				constexpr let_impl1(EnvList const& env)
+				in_phase const& in;
+				constexpr in_phase(EnvList const& env)
 					: env_(env), in(*this)
 				{ }
 				template<class LE>
@@ -271,36 +283,36 @@ namespace ruin
 					return {env_, le};
 				}
 			};
-			struct let_impl2
+			struct let_phase
 			{
 				template<class Binder>
-				constexpr ruin::lambda::detail::let_impl1<std::tuple<Binder>> operator[](Binder const& bdr) const
+				constexpr ruin::lambda::detail::in_phase<std::tuple<Binder>> operator[](Binder const& bdr) const
 				{
 					return {std::make_tuple(bdr)};
 				}
 				template<class... Envs>
-				constexpr ruin::lambda::detail::let_impl1<std::tuple<Envs...>> operator[](std::tuple<Envs...> const& bdrs) const
+				constexpr ruin::lambda::detail::in_phase<std::tuple<Envs...>> operator[](std::tuple<Envs...> const& bdrs) const
 				{
 					return {bdrs};
 				}
 			};
 		}
-		static constexpr ruin::lambda::detail::let_impl2 let{};
+		static constexpr ruin::lambda::detail::let_phase let{};
 		
 		namespace detail
 		{
-			template<std::size_t BVID>
-			struct lambda_impl
+			template<std::size_t... BVIDs>
+			struct lambda_phase
 			{
 				template<class LE>
-				constexpr ruin::lambda::exp::abstract<BVID, LE> operator[](LE const& le) const
+				constexpr ruin::lambda::exp::abstract<std::tuple<ruin::lambda::exp::variable<BVIDs>...>, LE> operator[](LE const& le) const
 				{
 					return {le};
 				}
 			};
 		}
-		template<std::size_t BVID>
-		constexpr ruin::lambda::detail::lambda_impl<BVID> lambda(ruin::lambda::exp::variable<BVID>)
+		template<std::size_t... BVIDs>
+		constexpr ruin::lambda::detail::lambda_phase<BVIDs...> lambda(ruin::lambda::exp::variable<BVIDs>...)
 		{
 			return {};
 		}
@@ -332,8 +344,8 @@ namespace ruin
 			return ruin::lambda::detail::LEify<T>::go(t);
 		}
 		
-		template<std::size_t BV, class T>
-		constexpr ruin::lambda::detail::binder<BV, typename ruin::lambda::detail::LEify<T>::type> operator==(ruin::lambda::exp::variable<BV>, T t)
+		template<std::size_t BVID, class T>
+		constexpr ruin::lambda::detail::binder<BVID, typename ruin::lambda::detail::LEify<T>::type> operator==(ruin::lambda::exp::variable<BVID>, T t)
 		{
 			return {ruin::lambda::detail::LEify<T>::go(t)};
 		}
